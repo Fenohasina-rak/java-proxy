@@ -21,14 +21,14 @@ public class ProxyLogger {
 
     public synchronized void logRequest(String clientIp, String method, String host, String url) {
         String timestamp = LocalDateTime.now().format(FORMATTER);
-        String line = String.format("[%s] %-7s | IP: %-20s | HOST: %-40s | URL: %s",
+        String line = String.format("[%s] | %s | IP:%s | HOST: %s | URL: %s",
                 timestamp, method, clientIp, host, url);
         fileWriter.println(line);
     }
 
     public synchronized void log(String level, String clientIp, String message) {
         String timestamp = LocalDateTime.now().format(FORMATTER);
-        String line = String.format("[%s] %-7s | IP: %-20s | %s",
+        String line = String.format("[%s] | level:%s | IP:%s | message:%s",
                 timestamp, level, clientIp, message);
         fileWriter.println(line);
     }

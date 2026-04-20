@@ -4,15 +4,18 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 
 public class ProxyHandler implements Runnable {
 
-    private static final int REMOTE_TIMEOUT_MS = 10_000;
-    private static final int BUFFER_SIZE = 8192;
 
+    private static final int REMOTE_TIMEOUT_MS = AppConfig.getInt("remote.timeout", 10000);
+    private static final int BUFFER_SIZE = AppConfig.getInt("buffer.size", 8000);
     private final Socket clientSocket;
     private final ProxyLogger logger;
     private final String clientIp;
+    public List<String> LIST_BLOCKED_DOMAINS = Arrays.stream(AppConfig.get("blocked.websites.keyword").split(",")).toList();
 
     public ProxyHandler(Socket clientSocket, ProxyLogger logger) {
         this.clientSocket = clientSocket;
@@ -35,9 +38,6 @@ public class ProxyHandler implements Runnable {
             headersBuilder.append(requestLine).append("\r\n");
             String hostHeader = null;
             String line;
-            System.out.println("");
-            System.out.println("");
-            System.out.println("============================================================");
             while (!(line = readLine(clientIn)).isEmpty()) {
                 headersBuilder.append(line).append("\r\n");
                 if (line.toLowerCase().startsWith("host:")) {
@@ -51,16 +51,19 @@ public class ProxyHandler implements Runnable {
 
             String method = parts[0];
             String requestTarget = parts[1];
+            if(!LIST_BLOCKED_DOMAINS.stream().anyMatch(domain -> requestTarget.contains(domain))){
 
-            if ("CONNECT".equalsIgnoreCase(method)) {
+                if ("CONNECT".equalsIgnoreCase(method)) {
                     handleHttps(requestTarget, clientIn, clientOut);
-
+                } else {
+                    handleHttp(method, requestTarget, hostHeader, headersBuilder.toString(), clientIn, clientOut);
+                }
             } else {
-                handleHttp(method, requestTarget, hostHeader, headersBuilder.toString(), clientIn, clientOut);
+                logger.log("UNAUTHORIZED", clientSocket.getInetAddress().getHostAddress(),"BLOCKED HOST: " + requestTarget);
             }
 
         } catch (IOException e) {
-            //close
+            closeQuietly(clientSocket);
         } finally {
             closeQuietly(clientSocket);
         }
@@ -80,10 +83,6 @@ public class ProxyHandler implements Runnable {
 
         try (Socket remote = new Socket(host, port)) {
             remote.setSoTimeout(REMOTE_TIMEOUT_MS);
-            System.out.println("OUTBOUND CONNECTION");
-            System.out.println(host);
-            System.out.println(remote.getInetAddress().getHostName());
-
             clientOut.write("HTTP/1.1 200 Connection Established\r\n\r\n".getBytes());
             clientOut.flush();
 
