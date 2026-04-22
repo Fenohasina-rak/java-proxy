@@ -1,4 +1,8 @@
-package proxy;
+package proxy.src;
+
+import proxy.src.Helpers.AppConfig;
+import proxy.src.Services.ProxyHandler;
+import proxy.src.Services.ProxyLogger;
 
 import java.io.IOException;
 import java.net.ServerSocket;

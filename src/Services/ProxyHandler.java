@@ -1,11 +1,15 @@
-package proxy;
+package proxy.src.Services;
+
+import proxy.src.Helpers.AppConfig;
+import proxy.src.Helpers.LinkMatcher;
+import proxy.src.Sources.BlockedDomains.Factories.BlockedDomainFactory;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+
 
 public class ProxyHandler implements Runnable {
 
@@ -15,7 +19,8 @@ public class ProxyHandler implements Runnable {
     private final Socket clientSocket;
     private final ProxyLogger logger;
     private final String clientIp;
-    public List<String> LIST_BLOCKED_DOMAINS = Arrays.stream(AppConfig.get("blocked.websites.keyword").split(",")).toList();
+
+
 
     public ProxyHandler(Socket clientSocket, ProxyLogger logger) {
         this.clientSocket = clientSocket;
@@ -51,8 +56,8 @@ public class ProxyHandler implements Runnable {
 
             String method = parts[0];
             String requestTarget = parts[1];
-            if(!LIST_BLOCKED_DOMAINS.stream().anyMatch(domain -> requestTarget.contains(domain))){
 
+            if(!checkDomainMatch(requestTarget, BlockedDomainFactory.BlockedDomains())){
                 if ("CONNECT".equalsIgnoreCase(method)) {
                     handleHttps(requestTarget, clientIn, clientOut);
                 } else {
@@ -211,5 +216,9 @@ public class ProxyHandler implements Runnable {
 
     private void closeQuietly(Closeable c) {
         try { if (c != null) c.close(); } catch (IOException ignored) {}
+    }
+
+    private boolean checkDomainMatch(String domain, HashSet<String> bannedDomain){
+        return LinkMatcher.isMatching(domain, bannedDomain);
     }
 }
