@@ -1,14 +1,19 @@
 package proxy.src.Services;
 
 import proxy.src.Helpers.AppConfig;
+import proxy.src.Helpers.Decoder;
 import proxy.src.Helpers.LinkMatcher;
+import proxy.src.Models.RequestBuilder;
+import proxy.src.Models.User;
 import proxy.src.Sources.BlockedDomains.Factories.BlockedDomainFactory;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 
 public class ProxyHandler implements Runnable {
@@ -38,33 +43,22 @@ public class ProxyHandler implements Runnable {
             String requestLine = readLine(clientIn);
             if (requestLine == null || requestLine.isEmpty()) return;
 
-
-            StringBuilder headersBuilder = new StringBuilder();
-            headersBuilder.append(requestLine).append("\r\n");
-            String hostHeader = null;
-            String line;
-            while (!(line = readLine(clientIn)).isEmpty()) {
-                headersBuilder.append(line).append("\r\n");
-                if (line.toLowerCase().startsWith("host:")) {
-                    hostHeader = line.substring(5).trim();
-                }
-            }
-            headersBuilder.append("\r\n");
+            RequestBuilder requestBuilder = getRequestBuilder(requestLine, clientIn, new User());
 
             String[] parts = requestLine.split(" ");
             if (parts.length < 2) return;
 
             String method = parts[0];
             String requestTarget = parts[1];
-
-            if(!checkDomainMatch(requestTarget, BlockedDomainFactory.BlockedDomains())){
+            boolean userAuthorized = !checkDomainMatch(requestTarget, BlockedDomainFactory.BlockedDomains()) && checkUserMatch(requestBuilder.user());
+            if(userAuthorized){
                 if ("CONNECT".equalsIgnoreCase(method)) {
                     handleHttps(requestTarget, clientIn, clientOut);
                 } else {
-                    handleHttp(method, requestTarget, hostHeader, headersBuilder.toString(), clientIn, clientOut);
+                    handleHttp(method, requestTarget, requestBuilder.hostHeader(), requestBuilder.headersBuilder().toString(), clientIn, clientOut);
                 }
             } else {
-                logger.log("UNAUTHORIZED", clientSocket.getInetAddress().getHostAddress(),"BLOCKED HOST: " + requestTarget);
+                logger.log("UNAUTHORIZED", clientSocket.getInetAddress().getHostAddress(),"BLOCKED HOST: " + requestTarget + " OR WRONG CREDENTIALS");
             }
 
         } catch (IOException e) {
@@ -73,6 +67,31 @@ public class ProxyHandler implements Runnable {
             closeQuietly(clientSocket);
         }
     }
+
+    private RequestBuilder getRequestBuilder(String requestLine, InputStream clientIn, User userDetails) throws IOException {
+        StringBuilder headersBuilder = new StringBuilder();
+        headersBuilder.append(requestLine).append("\r\n");
+        String hostHeader = null;
+        String authorization;
+        String line;
+        while (!(line = readLine(clientIn)).isEmpty()) {
+            headersBuilder.append(line).append("\r\n");
+            if (line.toLowerCase().startsWith("host:")) {
+                hostHeader = line.substring(5).trim();
+            }
+            if (line.toLowerCase().startsWith("proxy-authorization:")){
+                String base64Authorization  = line.substring(27).trim();
+                authorization = Decoder.decodeBase64(base64Authorization);
+                List<String> splittedAuth = Arrays.stream(authorization.split(":")).toList();
+                userDetails.setUser(splittedAuth.getFirst());
+                userDetails.setPassword(splittedAuth.getLast());
+            }
+        }
+        headersBuilder.append("\r\n");
+        return new RequestBuilder(headersBuilder, hostHeader, userDetails);
+    }
+
+
 
 
     private void handleHttps(String requestTarget, InputStream clientIn, OutputStream clientOut) throws IOException {
@@ -220,5 +239,9 @@ public class ProxyHandler implements Runnable {
 
     private boolean checkDomainMatch(String domain, HashSet<String> bannedDomain){
         return LinkMatcher.isMatching(domain, bannedDomain);
+    }
+
+    private boolean checkUserMatch(User user){
+        return AppConfig.LIST_OF_USERS.stream().anyMatch(userDB -> userDB.getUser().equalsIgnoreCase(user.getUser()) && userDB.getPassword().equals(user.getPassword()));
     }
 }
