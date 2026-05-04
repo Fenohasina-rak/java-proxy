@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>java-proxy — Code Documentation</title>
+    <style>
+        :root {
+            --bg-primary: #0d0f12;
+            --bg-secondary: #13171e;
+            --bg-card: #1a1f29;
+            --bg-card-hover: #1e2535;
+            --border: #2a3040;
+            --accent: #4f9cf9;
+            --accent-glow: rgba(79, 156, 249, 0.15);
+            --accent-2: #7c5cbf;
+            --accent-3: #2eb87e;
+            --accent-4: #e8634a;
+            --text-primary: #e2e8f0;
+            --text-secondary: #8892a4;
+            --text-muted: #4a5568;
+            --code-bg: #0a0c10;
+            --sidebar-width: 280px;
+            --header-height: 64px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* ── TOP HEADER ── */
+        .top-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-height);
+            background: rgba(13, 15, 18, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            z-index: 100;
+            gap: 20px;
+        }
+
+        .header-logo {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .header-project {
+            font-family: 'Georgia', serif;
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: normal;
+        }
+
+        .header-meta {
+            margin-left: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            z-index: 50;
+            padding: 24px 0;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .sidebar-section {
+            padding: 0 20px;
+            margin-bottom: 28px;
+        }
+
+        .sidebar-label {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13.5px;
+            transition: all 0.15s ease;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .sidebar-nav .icon {
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 48px 56px 80px;
+            max-width: 1100px;
+        }
+
+        /* ── HERO SECTION ── */
+        .hero {
+            margin-bottom: 64px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-eyebrow {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: normal;
+            line-height: 1.15;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 36px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-value {
+            font-family: 'Courier New', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── DOC SECTIONS ── */
+        .doc-section {
+            margin-bottom: 72px;
+            scroll-margin-top: calc(var(--header-height) + 24px);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .section-icon.arch { background: rgba(79, 156, 249, 0.12); }
+        .section-icon.api  { background: rgba(46, 184, 126, 0.12); }
+        .section-icon.erd  { background: rgba(124, 92, 191, 0.12); }
+        .section-icon.files { background: rgba(232, 99, 74, 0.12); }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: normal;
+            letter-spacing: -0.01em;
+        }
+
+        .section-title.arch { color: var(--accent); }
+        .section-title.api  { color: var(--accent-3); }
+        .section-title.erd  { color: var(--accent-2); }
+        .section-title.files { color: var(--accent-4); }
+
+        .section-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ── CONTENT STYLES (applied to Gemini output) ── */
+        .doc-content h2 {
+            font-size: 20px;
+            font-weight: normal;
+            color: var(--text-primary);
+            margin: 32px 0 12px;
+            letter-spacing: -0.01em;
+        }
+
+        .doc-content h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin: 24px 0 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .doc-content p {
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            font-size: 15px;
+        }
+
+        .doc-content ul, .doc-content ol {
+            margin: 12px 0 18px 20px;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .doc-content li { margin-bottom: 6px; }
+
+        .doc-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0 28px;
+            font-size: 13.5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .doc-content th {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .doc-content td {
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        .doc-content tr:hover td { background: var(--bg-card); }
+
+        .doc-content pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin: 16px 0 24px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .doc-content code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--accent);
+            background: rgba(79, 156, 249, 0.08);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .doc-content pre code {
+            color: #a8c5e8;
+            background: none;
+            padding: 0;
+            font-size: 13px;
+        }
+
+        .doc-content strong { color: var(--text-primary); font-weight: 700; }
+        .doc-content em { color: var(--accent); font-style: italic; }
+
+        .doc-content hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 28px 0;
+        }
+
+        .doc-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 10px 20px;
+            margin: 16px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+            background: var(--accent-glow);
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* ── FILE TREE ── */
+        .file-tree {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .file-tree .dir {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .file-tree .file-java { color: #e8a94a; }
+        .file-tree .file-xml  { color: #7c5cbf; }
+        .file-tree .file-props { color: #2eb87e; }
+        .file-tree .file-sql  { color: #e8634a; }
+        .file-tree .file-other { color: var(--text-muted); }
+
+        .file-tree .stats-row {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        /* ── ERROR SECTION ── */
+        .error-section {
+            background: rgba(232, 99, 74, 0.08);
+            border: 1px solid rgba(232, 99, 74, 0.3);
+            border-radius: 8px;
+            padding: 20px 24px;
+            color: var(--text-secondary);
+        }
+
+        /* ── FOOTER ── */
+        .doc-footer {
+            margin-top: 80px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .doc-section { animation: fadeIn 0.4s ease forwards; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 24px 20px; }
+            .hero-title { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── TOP HEADER ── -->
+<header class="top-header">
+    <span class="header-logo">⟨/⟩ DocGen</span>
+    <div class="header-divider"></div>
+    <span class="header-project">java-proxy</span>
+    <span class="header-meta">Generated mai 04, 2026 at 17:48:00</span>
+</header>
+
+<!-- ── SIDEBAR NAVIGATION ── -->
+<nav class="sidebar">
+    <div class="sidebar-section">
+        <div class="sidebar-label">Documentation</div>
+        <div class="sidebar-nav">
+            <a href="#overview"><span class="icon">◈</span> Overview</a>
+            <a href="#architecture"><span class="icon">🏗</span> Architecture</a>
+            <a href="#api"><span class="icon">🔌</span> API Specification</a>
+            <a href="#erd"><span class="icon">🗄</span> Entity Relationships</a>
+            <a href="#files"><span class="icon">📂</span> File Structure</a>
+        </div>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-label">Project Stats</div>
+        <div style="padding: 0 4px; font-size: 12px; color: var(--text-muted); line-height: 2;">
+            <div>📄 <strong style="color:var(--text-secondary)">14</strong> files</div>
+            <div>📁 <strong style="color:var(--text-secondary)">9</strong> directories</div>
+        </div>
+    </div>
+</nav>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main">
+
+    <!-- HERO -->
+    <section id="overview" class="hero">
+        <p class="hero-eyebrow">Code Documentation — Auto-Generated</p>
+        <h1 class="hero-title">
+            <em>java-proxy</em><br>Documentation
+        </h1>
+        <p class="hero-subtitle">
+            Comprehensive technical documentation automatically generated by analyzing
+            the source code with Google Gemini AI.
+        </p>
+        <div class="hero-stats">
+            <div class="stat">
+                <span class="stat-value">14</span>
+                <span class="stat-label">Source Files</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">9</span>
+                <span class="stat-label">Directories</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">3</span>
+                <span class="stat-label">Doc Sections</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture" class="doc-section">
+        <div class="section-header">
+            <div class="section-icon arch">🏗</div>
+            <div>
+                <h2 class="section-title arch">Architecture</h2>
+                <div class="section-desc">System design, module breakdown & design patterns</div>
+            </div>
+        </div>
+        <div class="doc-content">
+            <section>
+    <h2>1. Project Overview</h2>
+    <p>
+        The <strong>java-proxy</strong> project is a high-performance, multi-threaded HTTP/HTTPS proxy server implemented in Java. Its primary purpose is to act as an intermediary for client requests, providing features such as domain-based filtering (blacklisting), user authentication via <code>Proxy-Authorization</code> headers, and detailed traffic logging. 
+    </p>
+    <p>
+        The server supports standard HTTP request forwarding and HTTPS tunneling using the <code>CONNECT</code> method. A notable feature is its use of modern Java concurrency primitives to handle multiple simultaneous connections efficiently.
+    </p>
+
+    <h2>2. Technology Stack</h2>
+    <ul>
+        <li><strong>Language:</strong> Java (Version 21+ recommended due to the use of Virtual Threads).</li>
+        <li><strong>Concurrency:</strong> Project Loom / Virtual Threads (<code>Executors.newVirtualThreadPerTaskExecutor()</code>).</li>
+        <li><strong>I/O:</strong> Standard Blocking I/O (<code>java.net.Socket</code>, <code>java.io</code>) with stream piping.</li>
+        <li><strong>Configuration:</strong> Java Properties API and File NIO.</li>
+    </ul>
+
+    <h2>3. Architecture Style</h2>
+    <p>
+        The project follows a <strong>Layered Monolith</strong> architecture with a focus on <strong>Interface-based Programming</strong> in the data source layer. The architecture is divided into clear functional areas:
+    </p>
+    <ul>
+        <li><strong>Entry Point:</strong> Orchestrates the server socket and thread pool.</li>
+        <li><strong>Service Layer:</strong> Contains the core business logic for protocol handling and logging.</li>
+        <li><strong>Data Source Layer:</strong> Abstracted via interfaces to allow multiple implementations for retrieving blocked domains and user credentials.</li>
+        <li><strong>Helper/Utility Layer:</strong> Provides cross-cutting concerns like configuration loading and string matching.</li>
+    </ul>
+
+    <h2>4. Module/Package Breakdown</h2>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th style="padding: 10px;">Package</th>
+                <th style="padding: 10px;">Responsibility</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 10px;"><code>proxy.src</code></td>
+                <td>Main entry point (<code>ProxyServer</code>). Manages the lifecycle of the server socket.</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px;"><code>proxy.src.Services</code></td>
+                <td>Core logic. <code>ProxyHandler</code> manages the request/response lifecycle; <code>ProxyLogger</code> handles asynchronous logging.</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px;"><code>proxy.src.Sources</code></td>
+                <td>Data abstraction layer. Defines interfaces and implementations for retrieving "Blocked Domains" and "Users" from various sources (Files, Properties).</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px;"><code>proxy.src.Helpers</code></td>
+                <td>Utility classes for configuration (<code>AppConfig</code>), Base64 decoding, and domain pattern matching.</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px;"><code>proxy.src.Models</code></td>
+                <td>Data transfer objects and records, such as <code>User</code> and <code>RequestBuilder</code>.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>5. Component Interaction Diagram</h2>
+    <p>The following diagram illustrates the flow of a single client request through the system:</p>
+    <pre style="padding: 15px; border: 1px solid #ddd; overflow-x: auto;">
+[ Client ] 
+    |
+    | (1) TCP Connection
+    v
+[ ProxyServer ] -- (2) Spawns Virtual Thread --> [ ProxyHandler ]
+                                                        |
+                                                        | (3) Parse Headers
+                                                        | (4) Auth & Block Check
+                                                        v
+        [ AppConfig ] <---------- [ BlockedDomainFactory ]
+        [ LinkMatcher ] <-------- [ UsersFromFile ]
+                                                        |
+            ____________________________________________|
+           |                                            |
+    [ HTTP Logic ]                               [ HTTPS Logic ]
+    (Direct Forwarding)                          (TCP Tunneling/Pipe)
+           |                                            |
+           |------> [ Remote Target Server ] <----------|
+           |                |                           |
+           |<---------------|                           |
+           |                                            |
+    [ ProxyLogger ] <-----------------------------------|
+    (Log to file)
+    </pre>
+
+    <h2>6. Key Design Patterns</h2>
+    <ul>
+        <li><strong>Factory Pattern:</strong> <code>BlockedDomainFactory</code> encapsulates the logic for aggregating blocked domains from multiple sources (Properties and Files), shielding the <code>ProxyHandler</code> from data retrieval details.</li>
+        <li><strong>Strategy Pattern:</strong> The use of <code>BlockedDomains</code> and <code>Users</code> interfaces allows the application to swap data sources (e.g., moving from a flat file to a database) without changing the service logic.</li>
+        <li><strong>Singleton/Static Utility:</strong> <code>AppConfig</code> acts as a centralized, globally accessible configuration provider initialized via a static block.</li>
+        <li><strong>Worker Thread (Command):</strong> <code>ProxyHandler</code> implements <code>Runnable</code>, encapsulating the "command" of processing a socket connection, which is then executed by the <code>ExecutorService</code>.</li>
+    </ul>
+
+    <h2>7. Configuration & Infrastructure</h2>
+    <h3>Configuration Files</h3>
+    <p>The application relies on external resources located in a <code>Resources/</code> directory:</p>
+    <ul>
+        <li><code>config.properties</code>: Contains system settings like <code>app.port</code>, <code>remote.timeout</code>, and <code>buffer.size</code>.</li>
+        <li><code>user.properties</code>: Stores user credentials in <code>username=password</code> format.</li>
+        <li><code>light.txt</code>: A newline-separated list of blocked domains.</li>
+    </ul>
+
+    <h3>Infrastructure Notes</h3>
+    <ul>
+        <li><strong>Concurrency Model:</strong> By using <code>Executors.newVirtualThreadPerTaskExecutor()</code>, the server avoids the overhead of traditional thread pools, allowing it to scale to thousands of concurrent connections with minimal memory footprint.</li>
+        <li><strong>Error Handling:</strong> The system uses a "Quiet Close" mechanism and 502 Bad Gateway responses to ensure that remote failures do not crash the proxy service.</li>
+        <li><strong>Logging:</strong> Synchronized file writing ensures thread safety when multiple virtual threads attempt to log activity to <code>proxy.log</code>.</li>
+    </ul>
+</section>
+        </div>
+    </section>
+
+    <!-- API SPECIFICATION -->
+    <section id="api" class="doc-section">
+        <div class="section-header">
+            <div class="section-icon api">🔌</div>
+            <div>
+                <h2 class="section-title api">API Specification</h2>
+                <div class="section-desc">Endpoints, request/response models & authentication</div>
+            </div>
+        </div>
+        <div class="doc-content">
+            <section>
+    <h2>1. API Overview</h2>
+    <p>The <strong>java-proxy</strong> is a high-performance transparent forward proxy server. It intercepts client requests, performs domain-based filtering, validates user credentials, and forwards traffic to destination servers.</p>
+    <ul>
+        <li><strong>Base URL:</strong> <code>http://&lt;proxy-host&gt;:&lt;port&gt;</code> (Default port: <code>8080</code>)</li>
+        <li><strong>Authentication:</strong> Proxy-Authorization (Basic scheme: Base64 encoded <code>username:password</code>)</li>
+        <li><strong>Content Types:</strong> Transparent (supports all media types handled by the target servers)</li>
+        <li><strong>Protocol Support:</strong> HTTP/1.1 and HTTPS (via <code>CONNECT</code> tunneling)</li>
+    </ul>
+</section>
+
+<section>
+    <h2>2. Endpoints Table</h2>
+    <p>As a forward proxy, this application does not host specific REST resources but acts as a gateway for all outbound traffic.</p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Request Body</th>
+                <th>Response</th>
+                <th>HTTP Status Codes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>CONNECT</code></td>
+                <td><code>{host}:{port}</code></td>
+                <td>Establishes an HTTPS tunnel to the destination server.</td>
+                <td>Encrypted Stream</td>
+                <td>Binary Stream</td>
+                <td><code>200</code>, <code>502</code></td>
+            </tr>
+            <tr>
+                <td><code>GET</code>, <code>POST</code>, <code>PUT</code>, etc.</td>
+                <td><code>{absolute_uri}</code></td>
+                <td>Proxies standard HTTP requests to the target host.</td>
+                <td>Varies by request</td>
+                <td>Varies by target</td>
+                <td><code>200</code>, <code>502</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>3. Data Models</h2>
+    
+    <h3>User</h3>
+    <p>Represents a registered user allowed to use the proxy service. Loaded from <code>Resources/user.properties</code>.</p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>user</code></td>
+                <td>String</td>
+                <td>Yes</td>
+                <td>The unique username for authentication.</td>
+            </tr>
+            <tr>
+                <td><code>password</code></td>
+                <td>String</td>
+                <td>Yes</td>
+                <td>The plain-text password associated with the user.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>RequestBuilder (Internal)</h3>
+    <p>An internal record used to parse and store incoming request metadata.</p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>headersBuilder</code></td>
+                <td>StringBuilder</td>
+                <td>Accumulated raw HTTP headers.</td>
+            </tr>
+            <tr>
+                <td><code>hostHeader</code></td>
+                <td>String</td>
+                <td>The value of the <code>Host</code> header.</td>
+            </tr>
+            <tr>
+                <td><code>user</code></td>
+                <td>User</td>
+                <td>The authenticated user object extracted from headers.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>4. Error Handling</h2>
+    <p>The proxy returns standard HTTP status codes when it encounters issues connecting to the upstream server or validating the request.</p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Meaning</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>502 Bad Gateway</code></td>
+                <td>Remote Connection Failed</td>
+                <td>The proxy could not establish a connection to the destination host or the remote host timed out.</td>
+            </tr>
+            <tr>
+                <td><code>Connection Closed</code></td>
+                <td>Unauthorized / Blocked</td>
+                <td>If the domain is in the blocklist or credentials are invalid, the proxy logs the event and terminates the socket connection.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>5. Security</h2>
+    <h3>Authentication</h3>
+    <p>The proxy implements <strong>Proxy Authentication</strong>. Clients must provide the following header:</p>
+    <pre><code>Proxy-Authorization: Basic &lt;Base64(username:password)&gt;</code></pre>
+    
+    <h3>Domain Filtering</h3>
+    <p>The server implements a multi-source blocklist strategy:</p>
+    <ul>
+        <li><strong>File-based:</strong> Domains listed in <code>Resources/light.txt</code>.</li>
+        <li><strong>Property-based:</strong> Keywords defined in <code>config.properties</code> under <code>blocked.websites.keyword</code>.</li>
+        <li><strong>Subdomain Matching:</strong> The <code>LinkMatcher</code> recursively checks subdomains (e.g., if <code>example.com</code> is blocked, <code>sub.example.com</code> is also blocked).</li>
+    </ul>
+</section>
+
+<section>
+    <h2>6. Endpoint Details</h2>
+
+    <h3>HTTPS Tunneling (CONNECT)</h3>
+    <p>Used by clients to initiate SSL/TLS communication through the proxy.</p>
+    <h4>Parameters</h4>
+    <ul>
+        <li><strong>Header:</strong> <code>Proxy-Authorization</code> (Required)</li>
+        <li><strong>Target:</strong> The destination host and port (e.g., <code>google.com:443</code>)</li>
+    </ul>
+    <h4>Example Request</h4>
+    <pre><code>CONNECT google.com:443 HTTP/1.1
+Proxy-Authorization: Basic dXNlcjpwYXNzd29yZA==</code></pre>
+    <h4>Example Response</h4>
+    <pre><code>HTTP/1.1 200 Connection Established</code></pre>
+
+    <h3>HTTP Proxying</h3>
+    <p>Forwards standard HTTP requests. The proxy rewrites the request line to use the relative path before forwarding to the remote host.</p>
+    <h4>Request Body</h4>
+    <p>The proxy supports request bodies (e.g., for <code>POST</code>) by reading the <code>Content-Length</code> header and streaming the specified number of bytes to the remote server.</p>
+    <h4>Example Request</h4>
+    <pre><code>GET http://example.com/index.html HTTP/1.1
+Host: example.com
+Proxy-Authorization: Basic dXNlcjpwYXNzd29yZA==</code></pre>
+    <h4>Example Response</h4>
+    <pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+... (Target Server Content)</code></pre>
+</section>
+        </div>
+    </section>
+
+    <!-- ERD -->
+    <section id="erd" class="doc-section">
+        <div class="section-header">
+            <div class="section-icon erd">🗄</div>
+            <div>
+                <h2 class="section-title erd">Entity Relationships</h2>
+                <div class="section-desc">Data model, entities, relationships & database schema</div>
+            </div>
+        </div>
+        <div class="doc-content">
+            <section>
+    <h2>1. Entity Overview</h2>
+    <p>The following entities are identified based on the core domain models and data persistence logic (file-based properties and logging) found in the <code>java-proxy</code> project.</p>
+    <ul>
+        <li><strong>User</strong>: Represents the credentials used for proxy authentication, loaded from <code>user.properties</code>.</li>
+        <li><strong>BlockedDomain</strong>: Represents a domain or keyword used to filter and restrict traffic, loaded from <code>light.txt</code> and <code>config.properties</code>.</li>
+        <li><strong>ProxyLog</strong>: Represents the audit trail of requests and system events handled by the proxy server, persisted to <code>proxy.log</code>.</li>
+    </ul>
+</section>
+
+<section>
+    <h2>2. ERD as ASCII Art</h2>
+    <pre><code>
+┌──────────────────┐          ┌──────────────────┐
+│       User       │          │     ProxyLog     │
+├──────────────────┤          ├──────────────────┤
+│ user (PK)        │          │ id (PK)          │
+│ password         │          │ timestamp        │
+└────────┬─────────┘          │ level            │
+         │                    │ client_ip        │
+         │ 1                  │ method           │
+         │                    │ host             │
+         │                    │ url              │
+         │ 0..*               │ message          │
+         └───────────────────╼└──────────────────┘
+           (Authenticated)
+
+┌──────────────────┐
+│  BlockedDomain   │
+├──────────────────┤
+│ domain_name (PK) │
+└──────────────────┘
+    </code></pre>
+</section>
+
+<section>
+    <h2>3. Entity Details Table</h2>
+    
+    <h3>Entity: User</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Data Type</th>
+                <th>Constraints</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>user</td>
+                <td>VARCHAR(255)</td>
+                <td>PK, NOT NULL</td>
+                <td>The unique username for proxy authentication.</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>VARCHAR(255)</td>
+                <td>NOT NULL</td>
+                <td>The password associated with the user.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Entity: BlockedDomain</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Data Type</th>
+                <th>Constraints</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>domain_name</td>
+                <td>VARCHAR(255)</td>
+                <td>PK, NOT NULL</td>
+                <td>The domain string or keyword to be blocked (e.g., "example.com").</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Entity: ProxyLog</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Data Type</th>
+                <th>Constraints</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>id</td>
+                <td>BIGINT</td>
+                <td>PK, AUTO_INCREMENT</td>
+                <td>Unique identifier for the log entry.</td>
+            </tr>
+            <tr>
+                <td>timestamp</td>
+                <td>DATETIME</td>
+                <td>NOT NULL</td>
+                <td>The date and time the event occurred.</td>
+            </tr>
+            <tr>
+                <td>level</td>
+                <td>VARCHAR(10)</td>
+                <td>NOT NULL</td>
+                <td>Log level (INFO, ERROR, UNAUTHORIZED).</td>
+            </tr>
+            <tr>
+                <td>client_ip</td>
+                <td>VARCHAR(45)</td>
+                <td>NOT NULL</td>
+                <td>The IP address of the client making the request.</td>
+            </tr>
+            <tr>
+                <td>method</td>
+                <td>VARCHAR(10)</td>
+                <td>NULL</td>
+                <td>HTTP method (GET, POST, CONNECT, etc.).</td>
+            </tr>
+            <tr>
+                <td>host</td>
+                <td>VARCHAR(255)</td>
+                <td>NULL</td>
+                <td>The destination host.</td>
+            </tr>
+            <tr>
+                <td>url</td>
+                <td>TEXT</td>
+                <td>NULL</td>
+                <td>The full request URL.</td>
+            </tr>
+            <tr>
+                <td>message</td>
+                <td>TEXT</td>
+                <td>NULL</td>
+                <td>Detailed error or system message.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>4. Relationships</h2>
+    <ul>
+        <li><strong>User to ProxyLog (One-to-Many)</strong>: While the current implementation logs <code>client_ip</code>, logically, a <code>User</code> performs actions that generate multiple <code>ProxyLog</code> entries. The relationship is implicit through the authentication check in <code>ProxyHandler</code>.</li>
+        <li><strong>BlockedDomain (Independent)</strong>: This entity acts as a reference list for the <code>LinkMatcher</code> service to validate incoming requests.</li>
+    </ul>
+</section>
+
+<section>
+    <h2>5. Database Indexes</h2>
+    <p>Based on the search patterns in the source code (e.g., <code>HashSet.contains</code> and <code>stream().anyMatch</code>), the following indexes are recommended for a relational implementation:</p>
+    <ul>
+        <li><code>idx_user_username</code>: Unique index on <code>User(user)</code> for fast authentication lookups.</li>
+        <li><code>idx_blocked_domain_name</code>: Unique index on <code>BlockedDomain(domain_name)</code> for high-performance filtering.</li>
+        <li><code>idx_log_timestamp</code>: Index on <code>ProxyLog(timestamp)</code> for chronological log retrieval.</li>
+        <li><code>idx_log_client_ip</code>: Index on <code>ProxyLog(client_ip)</code> for auditing specific client activity.</li>
+    </ul>
+</section>
+
+<section>
+    <h2>6. SQL DDL</h2>
+    <pre><code><code class="language-sql">-- Reconstructed DDL for java-proxy domain models
+
+CREATE TABLE users (
+    user VARCHAR(255) PRIMARY KEY,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE blocked_domains (
+    domain_name VARCHAR(255) PRIMARY KEY
+);
+
+CREATE TABLE proxy_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    timestamp DATETIME NOT NULL,
+    level VARCHAR(10) NOT NULL,
+    client_ip VARCHAR(45) NOT NULL,
+    method VARCHAR(10),
+    host VARCHAR(255),
+    url TEXT,
+    message TEXT
+);
+
+-- Initial data seed based on provided logic
+-- Note: In the app, these are loaded from .properties and .txt files
+CREATE INDEX idx_proxy_logs_timestamp ON proxy_logs(timestamp);
+CREATE INDEX idx_proxy_logs_client_ip ON proxy_logs(client_ip);</code></pre>
+</section>
+        </div>
+    </section>
+
+    <!-- FILE STRUCTURE -->
+    <section id="files" class="doc-section">
+        <div class="section-header">
+            <div class="section-icon files">📂</div>
+            <div>
+                <h2 class="section-title files">File Structure</h2>
+                <div class="section-desc">All scanned source files and directories</div>
+            </div>
+        </div>
+        <div class="file-tree">
+            <pre>java-proxy/
+│
+├── src\Helpers/
+│   ├── AppConfig.java  (2KB)
+│   ├── Decoder.java  (338B)
+│   ├── LinkMatcher.java  (745B)
+│
+├── src\Models/
+│   ├── RequestBuilder.java  (124B)
+│   ├── User.java  (409B)
+│
+├── src/
+│   ├── ProxyServer.java  (882B)
+│
+├── src\Services/
+│   ├── ProxyHandler.java  (9KB)
+│   ├── ProxyLogger.java  (1KB)
+│
+├── src\Sources\BlockedDomains\Factories/
+│   ├── BlockedDomainFactory.java  (790B)
+│
+├── src\Sources\BlockedDomains\Impl/
+│   ├── BlockedDomainImplFromProperties.java  (566B)
+│   ├── BlockedDomainsImplFromFile.java  (388B)
+│
+├── src\Sources\BlockedDomains\Interfaces/
+│   ├── BlockedDomains.java  (172B)
+│
+├── src\Sources\Users\Impl/
+│   ├── UsersFromFile.java  (340B)
+│
+├── src\Sources\Users\Interfaces/
+│   ├── Users.java  (174B)
+
+── 14 files, 9 directories</pre>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="doc-footer">
+        <span>Generated by <strong>DocGen</strong> — Powered by Google Gemini AI</span>
+        <span>mai 04, 2026 at 17:48:00</span>
+    </footer>
+</main>
+
+<script>
+    // Active nav highlight on scroll
+    const sections = document.querySelectorAll('.doc-section, .hero');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const id = entry.target.id;
+                const active = document.querySelector('.sidebar-nav a[href="#' + id + '"]');
+                if (active) active.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
