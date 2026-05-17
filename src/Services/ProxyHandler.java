@@ -21,6 +21,7 @@ public class ProxyHandler implements Runnable {
 
     private static final int REMOTE_TIMEOUT_MS = AppConfig.getInt("remote.timeout", 10000);
     private static final int BUFFER_SIZE = AppConfig.getInt("buffer.size", 8000);
+    private static final boolean IS_AUTH_REQUIRED = (Integer.valueOf(AppConfig.getInt("authentication.required", 0)).equals(0)) ? false : true;
     private final Socket clientSocket;
     private final ProxyLogger logger;
     private final String clientIp;
@@ -85,6 +86,8 @@ public class ProxyHandler implements Runnable {
                 List<String> splittedAuth = Arrays.stream(authorization.split(":")).toList();
                 userDetails.setUser(splittedAuth.getFirst());
                 userDetails.setPassword(splittedAuth.getLast());
+                System.out.println("HERE: " + userDetails.getUser());
+                System.out.println(userDetails.getPassword());
             }
         }
         headersBuilder.append("\r\n");
@@ -242,6 +245,12 @@ public class ProxyHandler implements Runnable {
     }
 
     private boolean checkUserMatch(User user){
-        return AppConfig.LIST_OF_USERS.stream().anyMatch(userDB -> userDB.getUser().equalsIgnoreCase(user.getUser()) && userDB.getPassword().equals(user.getPassword()));
+        boolean isAuthenticated = true;
+        if(IS_AUTH_REQUIRED){
+            isAuthenticated =  AppConfig.LIST_OF_USERS.stream().anyMatch(userDB -> userDB.getUser().equalsIgnoreCase(user.getUser()) && userDB.getPassword().equals(user.getPassword()));
+        }
+        return isAuthenticated;
     }
+
+
 }

@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 public class LinkMatcher {
     public static boolean isMatching(String requestTarget, HashSet<String> listBlockedDomains) {
+        requestTarget = getStrippedDomainName(requestTarget);
         if (listBlockedDomains.contains(requestTarget)) return true;
         String temp = requestTarget;
         int dotIndex;
@@ -16,5 +17,9 @@ public class LinkMatcher {
         }
         //si pas return true amle loop, false zany
         return false;
+    }
+
+    private static String getStrippedDomainName(String request){
+        return request.strip().split(":")[0];
     }
 }
